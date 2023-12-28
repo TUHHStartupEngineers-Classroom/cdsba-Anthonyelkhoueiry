@@ -1,5 +1,5 @@
 ---
-title: "Chap2: Statistic s"
+title: "Chap2:Statistics"
 author: "Anthony El Khoueiry"
 format: 
     html:
