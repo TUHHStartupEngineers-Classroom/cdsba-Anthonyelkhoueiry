@@ -6,9 +6,9 @@
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
-<meta name="author" content="Oliver Mork">
+<meta name="author" content="Anthony El Khoueiry">
 
-<title>MyLabJournal - Randomized Controlled Trials</title>
+<title>MyLabJournal - Chap6: RCT</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -148,14 +148,27 @@ ul.task-list li input[type="checkbox"] {
 <!-- sidebar -->
 <!-- margin-sidebar -->
     <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
-        
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Contents</h2>
+   
+  <ul class="collapse">
+  <li><a href="#load-the-ggplot2-library" id="toc-load-the-ggplot2-library" class="nav-link active" data-scroll-target="#load-the-ggplot2-library"><span class="header-section-number">1</span> Load the ggplot2 library</a></li>
+  <li><a href="#read-the-customer-data-from-the-specified-file-path" id="toc-read-the-customer-data-from-the-specified-file-path" class="nav-link" data-scroll-target="#read-the-customer-data-from-the-specified-file-path"><span class="header-section-number">2</span> Read the customer data from the specified file path</a></li>
+  <li><a href="#create-ggplot-objects-to-compare-various-metrics-between-chatbot-conditions" id="toc-create-ggplot-objects-to-compare-various-metrics-between-chatbot-conditions" class="nav-link" data-scroll-target="#create-ggplot-objects-to-compare-various-metrics-between-chatbot-conditions"><span class="header-section-number">3</span> Create ggplot objects to compare various metrics between chatbot conditions</a></li>
+  <li><a href="#plot-the-comparisons" id="toc-plot-the-comparisons" class="nav-link" data-scroll-target="#plot-the-comparisons"><span class="header-section-number">4</span> Plot the comparisons</a></li>
+  <li><a href="#fit-linear-models-to-assess-the-impact-of-chatbot-on-purchase-and-purchase_amount" id="toc-fit-linear-models-to-assess-the-impact-of-chatbot-on-purchase-and-purchase_amount" class="nav-link" data-scroll-target="#fit-linear-models-to-assess-the-impact-of-chatbot-on-purchase-and-purchase_amount"><span class="header-section-number">5</span> Fit linear models to assess the impact of chatbot on purchase and purchase_amount</a></li>
+  <li><a href="#fit-interaction-models-to-evaluate-the-joint-effect-of-chatbot-and-mobile_device" id="toc-fit-interaction-models-to-evaluate-the-joint-effect-of-chatbot-and-mobile_device" class="nav-link" data-scroll-target="#fit-interaction-models-to-evaluate-the-joint-effect-of-chatbot-and-mobile_device"><span class="header-section-number">6</span> Fit interaction models to evaluate the joint effect of chatbot and mobile_device</a></li>
+  <li><a href="#fit-logistic-regression-model-to-assess-the-impact-of-chatbot-on-purchase-likelihood" id="toc-fit-logistic-regression-model-to-assess-the-impact-of-chatbot-on-purchase-likelihood" class="nav-link" data-scroll-target="#fit-logistic-regression-model-to-assess-the-impact-of-chatbot-on-purchase-likelihood"><span class="header-section-number">7</span> Fit logistic regression model to assess the impact of chatbot on purchase likelihood</a></li>
+  <li><a href="#display-summary-of-the-logistic-regression-model" id="toc-display-summary-of-the-logistic-regression-model" class="nav-link" data-scroll-target="#display-summary-of-the-logistic-regression-model"><span class="header-section-number">8</span> Display summary of the logistic regression model</a></li>
+  </ul>
+</nav>
     </div>
 <!-- main -->
 <main class="content" id="quarto-document-content">
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title">Randomized Controlled Trials</h1>
+<h1 class="title">Chap6: RCT</h1>
 </div>
 
 
@@ -165,7 +178,7 @@ ul.task-list li input[type="checkbox"] {
     <div>
     <div class="quarto-title-meta-heading">Author</div>
     <div class="quarto-title-meta-contents">
-             <p>Oliver Mork </p>
+             <p>Anthony El Khoueiry </p>
           </div>
   </div>
     
@@ -176,21 +189,56 @@ ul.task-list li input[type="checkbox"] {
 
 </header>
 
-<div class="callout callout-style-default callout-note callout-titled">
-<div class="callout-header d-flex align-content-center">
-<div class="callout-icon-container">
-<i class="callout-icon"></i>
-</div>
-<div class="callout-title-container flex-fill">
-Note
-</div>
-</div>
-<div class="callout-body-container callout-body">
-<p>You can delete everything in here and start fresh.</p>
-</div>
-</div>
+<hr>
+<section id="load-the-ggplot2-library" class="level1" data-number="1">
+<h1 data-number="1"><span class="header-section-number">1</span> Load the ggplot2 library</h1>
+<p>library(ggplot2)</p>
+</section>
+<section id="read-the-customer-data-from-the-specified-file-path" class="level1" data-number="2">
+<h1 data-number="2"><span class="header-section-number">2</span> Read the customer data from the specified file path</h1>
+<p>customer_data &lt;- readRDS(“C:/Users/user/OneDrive/Desktop/UNI/TUHH/SEM 3/CAUSAL DATA SC/RDS/abtest_online.rds”) customer_data</p>
+</section>
+<section id="create-ggplot-objects-to-compare-various-metrics-between-chatbot-conditions" class="level1" data-number="3">
+<h1 data-number="3"><span class="header-section-number">3</span> Create ggplot objects to compare various metrics between chatbot conditions</h1>
+<p>compare_purchase_amount &lt;- ggplot(customer_data, aes(x = chatbot, y = purchase_amount, color = as.factor(chatbot))) + stat_summary(geom = “errorbar”, width = .5, fun.data = “mean_se”, fun.args = list(mult=1.96), show.legend = F) + labs(x = NULL, y = “purchase_amount”, title = “Difference in purchase amount”) + scale_x_discrete(labels = c(“Not Treated”,“Treated”))</p>
+<p>compare_previous_visit &lt;- ggplot(customer_data, aes(x = chatbot, y = previous_visit, color = as.factor(chatbot))) + stat_summary(geom = “errorbar”, width = .5, fun.data = “mean_se”, fun.args = list(mult=1.96), show.legend = F) + labs(x = NULL, y = “previous_visit”, title = “Difference in previous visit”) + scale_x_discrete(labels = c(“Not Treated”,“Treated”))</p>
+<p>compare_mobile_device &lt;- ggplot(customer_data, aes(x = chatbot, y = mobile_device, color = as.factor(chatbot))) + stat_summary(geom = “errorbar”, width = .5, fun.data = “mean_se”, fun.args = list(mult=1.96), show.legend = F) + labs(x = NULL, y = “mobile_device”, title = “Difference in mobile device”) + scale_x_discrete(labels = c(“Not Treated”,“Treated”))</p>
+<p>compare_purchase &lt;- ggplot(customer_data, aes(x = chatbot, y = purchase, color = as.factor(chatbot))) + stat_summary(geom = “errorbar”, width = .5, fun.data = “mean_se”, fun.args = list(mult=1.96), show.legend = F) + labs(x = NULL, y = “purchase”, title = “Difference in purchase”) + scale_x_discrete(labels = c(“Not Treated”,“Treated”))</p>
+</section>
+<section id="plot-the-comparisons" class="level1" data-number="4">
+<h1 data-number="4"><span class="header-section-number">4</span> Plot the comparisons</h1>
+<p>compare_purchase_amount compare_previous_visit compare_mobile_device compare_purchase</p>
+<section id="section" class="level77">
+<p class="heading"></p>
+</section>
+</section>
+<section id="fit-linear-models-to-assess-the-impact-of-chatbot-on-purchase-and-purchase_amount" class="level1" data-number="5">
+<h1 data-number="5"><span class="header-section-number">5</span> Fit linear models to assess the impact of chatbot on purchase and purchase_amount</h1>
+<p>lm1 &lt;- lm(purchase ~ chatbot, data = customer_data) summary(lm1)</p>
+<p>lm2 &lt;- lm(purchase_amount ~ chatbot, data = customer_data) summary(lm2)</p>
+<section id="section-1" class="level77">
+<p class="heading"></p>
+</section>
+</section>
+<section id="fit-interaction-models-to-evaluate-the-joint-effect-of-chatbot-and-mobile_device" class="level1" data-number="6">
+<h1 data-number="6"><span class="header-section-number">6</span> Fit interaction models to evaluate the joint effect of chatbot and mobile_device</h1>
+<p>lm_mod1 &lt;- lm(purchase ~ chatbot * mobile_device, data = customer_data) summary(lm_mod1)</p>
+<p>lm_mod2 &lt;- lm(purchase_amount ~ chatbot * mobile_device, data = customer_data) summary(lm_mod2)</p>
+<section id="section-2" class="level77">
+<p class="heading"></p>
+</section>
+</section>
+<section id="fit-logistic-regression-model-to-assess-the-impact-of-chatbot-on-purchase-likelihood" class="level1" data-number="7">
+<h1 data-number="7"><span class="header-section-number">7</span> Fit logistic regression model to assess the impact of chatbot on purchase likelihood</h1>
+<p>logistic_model &lt;- glm(purchase ~ chatbot, family = binomial(link = ‘logit’), data = customer_data)</p>
+</section>
+<section id="display-summary-of-the-logistic-regression-model" class="level1" data-number="8">
+<h1 data-number="8"><span class="header-section-number">8</span> Display summary of the logistic regression model</h1>
+<p>summary(logistic_model)</p>
+<p>cat(“The chatbotTRUE coefficient is of particular interest. Since it has a negative estimate, it suggests that, compared to when the chatbot is not present, the presence of the chatbot is associated with a decrease in the log-odds of making a purchase. The p-value being less than 0.001 indicates that this effect is statistically significant.s</p>
 
 
+</section>
 
 </main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
