@@ -1,7 +1,6 @@
 ---
 title: "Chap1: Probability"
 author: "Anthony El Khoueiry"
-date: ""
 format: 
     html:
       code-line-numbers: true
