@@ -1,0 +1,18 @@
+{
+  "hash": "4bc5cfca45e63b376467cda1a725ff08",
+  "result": {
+    "markdown": "---\ntitle: \"Chap4: Causality\"\nauthor: \"Anthony El Khoueiry\"\ndate: \"\"\nformat: \n    html:\n      code-line-numbers: true\n      df-print: paged\n\n---\n\n----\n\n\n\n::: {.cell hash='04_causality_cache/html/unnamed-chunk-1_83df5cf834da544afaef683692ee3f47'}\n\n```{.r .cell-code}\n# The dataset to explore the correlation between coffee consumption and nightmares, considering a potential confounding variable (stress levels)\n\n# Sample data for a group of individuals\nset.seed(456)\nindividuals <- c(\"Amy\", \"Ben\", \"Chris\", \"Dana\", \"Eli\")\ncoffee_consumption <- rnorm(length(individuals), mean = 3, sd = 1)\nnightmare_frequency <- rnorm(length(individuals), mean = 2, sd = 1)\nstress_levels <- rnorm(length(individuals), mean = 5, sd = 2)\n\n# The dataframe\nsample_data <- data.frame(Individual = individuals, CoffeeConsumption = coffee_consumption, NightmareFrequency = nightmare_frequency, StressLevels = stress_levels)\n\n# The ggplot2 library\nlibrary(ggplot2)\n\n# The scatter plot to visualize the potential impact of stress levels\nggplot(sample_data, aes(x = CoffeeConsumption, y = NightmareFrequency, size = StressLevels)) +\n  geom_point() +\n  labs(title = \"Exploring Correlation: Coffee Consumption vs Nightmare Frequency\",\n       x = \"Coffee Consumption\",\n       y = \"Nightmare Frequency\",\n       size = \"Stress Levels\") +\n  theme_minimal()\n```\n\n::: {.cell-output-display}\n![](04_causality_files/figure-html/unnamed-chunk-1-1.png){width=672}\n:::\n:::",
+    "supporting": [],
+    "filters": [
+      "rmarkdown/pagebreak.lua"
+    ],
+    "includes": {
+      "include-in-header": [
+        "<link href=\"../../site_libs/pagedtable-1.1/css/pagedtable.css\" rel=\"stylesheet\" />\r\n<script src=\"../../site_libs/pagedtable-1.1/js/pagedtable.js\"></script>\r\n"
+      ]
+    },
+    "engineDependencies": {},
+    "preserve": {},
+    "postProcess": true
+  }
+}

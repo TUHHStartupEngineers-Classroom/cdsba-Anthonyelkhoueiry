@@ -1,7 +1,38 @@
 ---
-title: "Causality"
----
+title: "Chap4: Causality"
+author: "Anthony El Khoueiry"
+date: ""
+format: 
+    html:
+      code-line-numbers: true
+      df-print: paged
 
-::: callout-note
-You can delete everything in here and start fresh.
-:::
+---
+----
+
+
+```{r}
+# The dataset to explore the correlation between coffee consumption and nightmares, considering a potential confounding variable (stress levels)
+
+# Sample data for a group of individuals
+set.seed(456)
+individuals <- c("Amy", "Ben", "Chris", "Dana", "Eli")
+coffee_consumption <- rnorm(length(individuals), mean = 3, sd = 1)
+nightmare_frequency <- rnorm(length(individuals), mean = 2, sd = 1)
+stress_levels <- rnorm(length(individuals), mean = 5, sd = 2)
+
+# The dataframe
+sample_data <- data.frame(Individual = individuals, CoffeeConsumption = coffee_consumption, NightmareFrequency = nightmare_frequency, StressLevels = stress_levels)
+
+# The ggplot2 library
+library(ggplot2)
+
+# The scatter plot to visualize the potential impact of stress levels
+ggplot(sample_data, aes(x = CoffeeConsumption, y = NightmareFrequency, size = StressLevels)) +
+  geom_point() +
+  labs(title = "Exploring Correlation: Coffee Consumption vs Nightmare Frequency",
+       x = "Coffee Consumption",
+       y = "Nightmare Frequency",
+       size = "Stress Levels") +
+  theme_minimal()
+```

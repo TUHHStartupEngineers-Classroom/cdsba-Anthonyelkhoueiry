@@ -1,7 +1,74 @@
 ---
-title: "Regression and Statistical Inference"
----
+title: "Chap3: Regression"
+author: "Anthony El Khoueiry"
+date: ""
+format: 
+    html:
+      code-line-numbers: true
+      df-print: paged
 
-::: callout-note
-You can delete everything in here and start fresh.
-:::
+---
+----
+
+
+```{r}
+# Libraries
+library(dplyr)
+library(modelr)
+
+# The dataset containing information on car prices
+car_dataset <- readRDS("C:/Users/user/OneDrive/Desktop/UNI/TUHH/SEM 3/CAUSAL DATA SC/RDS/car_prices.rds")
+
+# The dataset and its dimensions
+data_dimensions <- dim(car_dataset)
+num_rows <- data_dimensions[1]
+num_columns <- data_dimensions[2]
+cat("Total rows in the dataset:", num_rows, "\n")
+cat("Total columns in the dataset:", num_columns, "\n")
+
+# Column names for each dataframe in the dataset
+column_names_list <- lapply(car_dataset, colnames)
+
+# Explore the data types of selected columns
+first_car_width <- head(car_dataset$carwidth, 1)
+cat("The data type of car width is", typeof(first_car_width), "\n")
+
+first_car_body <- head(car_dataset$carbody, 1)
+cat("The data type of car body is", typeof(first_car_body), "\n")
+
+print("Two main types are char and double.")
+print("Numeric types like double are suitable for quantitative information, while strings and char are useful for textual and categorical information. It is crucial to accurately represent real-world attributes in the dataset.")
+
+# Linear Regression
+glimpse(car_dataset)
+
+# Convert all columns to numeric
+car_dataset[] <- lapply(car_dataset, as.numeric)
+
+# The correlation matrix
+correlation_matrix <- car_dataset %>% cor() %>% round(2) %>% Matrix::tril()
+
+# Data type and range of the chosen predictor (enginesize)
+first_enginesize <- head(car_dataset$enginesize, 1)
+min_enginesize <- min(car_dataset$enginesize)
+max_enginesize <- max(car_dataset$enginesize)
+cat("The selected predictor is enginesize with a data type of ", typeof(first_enginesize), " and it ranges between ", min_enginesize, " and ", max_enginesize, "\n")
+
+# The impact of enginesize on price
+cat("Enginesize has a significant effect on price, showing a positive correlation of 89%. As enginesize increases, the price tends to increase proportionally.\n")
+
+# New variable 'seat_heating_TRUE' with random TRUE/FALSE values
+dataset_with_seat_heating <- car_dataset %>%
+  mutate(seat_heating_TRUE = sample(c(TRUE, FALSE), size = nrow(car_dataset), replace = TRUE))
+
+# The distribution of seat_heating_TRUE
+table(dataset_with_seat_heating$seat_heating_TRUE)
+
+# The regression with seat heating as a predictor
+linear_regression_model <- lm(price ~ seat_heating_TRUE, data = dataset_with_seat_heating)
+
+# The summary of the linear regression model
+summary(linear_regression_model)
+
+cat("Assigning all values as true for seat heating can lead to issues in regression analysis, including collinearity problems and difficulties in estimating coefficients.\n")
+```

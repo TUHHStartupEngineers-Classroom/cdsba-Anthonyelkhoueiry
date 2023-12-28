@@ -1,7 +1,116 @@
 ---
-title: "Regression Discontinuity"
----
+title: "Chap10: RDD"
+author: "Anthony El Khoueiry"
+format: 
+    html:
+      code-line-numbers: true
+      df-print: paged
 
-::: callout-note
-You can delete everything in here and start fresh.
-:::
+---
+----
+
+
+```{r}
+# Libraries
+library(dplyr)
+library(ggplot2)
+
+# Data for the current campaign
+df <- readRDS('C:/Users/user/OneDrive/Desktop/UNI/TUHH/SEM 3/CAUSAL DATA SC/RDS/coupon.rds')
+
+# [1] Regression Discontinuity Design Sensitivity Analysis ----
+
+# The cut-off
+c0 <- 60
+
+# Bandwidths
+bw_original <- c0 + c(-5, 5)
+bw_half <- c0 + c(-5, 5) / 2
+bw_double <- c0 + c(-5, 5) * 2
+
+# Function to run the regression discontinuity design analysis
+run_rdd_analysis <- function(df, bw) {
+  df_bw_below <- df %>% filter(days_since_last >= bw[1] & days_since_last < c0)
+  df_bw_above <- df %>% filter(days_since_last >= c0 & days_since_last <= bw[2])
+  df_bw <- bind_rows(df_bw_above, df_bw_below)
+  
+  lm_bw <- lm(purchase_after ~ days_since_last_centered + coupon, df_bw)
+  
+  model_bw_below <- lm(purchase_after ~ days_since_last, df_bw_below)
+  model_bw_above <- lm(purchase_after ~ days_since_last, df_bw_above)
+  
+  y0 <- predict(model_bw_below, tibble(days_since_last = c0))
+  y1 <- predict(model_bw_above, tibble(days_since_last = c0))
+  
+  late <- y1 - y0
+  return(list(LATE = late, Summary = summary(lm_bw)))
+}
+
+# Run the analysis with the original bandwidth
+LATE_original <- run_rdd_analysis(df, bw_original)
+
+# Run the analysis with half the bandwidth
+LATE_half_bandwidth <- run_rdd_analysis(df, bw_half)
+
+# Run the analysis with double the bandwidth
+LATE_double_bandwidth <- run_rdd_analysis(df, bw_double)
+
+# The results for the original bandwidth
+cat("Original Bandwidth:\n")
+cat("LATE:", LATE_original$LATE, "\n")
+print(LATE_original$Summary)
+
+# The results for half the bandwidth
+cat("\nHalf the Bandwidth:\n")
+cat("LATE:", LATE_half_bandwidth$LATE, "\n")
+print(LATE_half_bandwidth$Summary)
+
+# The results for double the bandwidth
+cat("\nDouble the Bandwidth:\n")
+cat("LATE:", LATE_double_bandwidth$LATE, "\n")
+print(LATE_double_bandwidth$Summary)
+
+cat("   ## The estimated LATE remains consistent across the three bandwidth choices, indicating a stable positive effect 
+      of the coupon variable on purchase_after.")
+
+cat("   ## The LATE estimate is slightly smaller for the half bandwidth, suggesting a more cautious estimate.")
+
+cat("   ## The LATE estimate is slightly larger for the double bandwidth, suggesting a potentially broader impact 
+      on individuals farther from the cutoff point.")
+
+cat("   ## Bandwidth choice influences the treatment (couponTRUE) effect estimation.")
+
+cat("   ## Coefficients vary with changes in bandwidth.")
+
+# [2] Different Past Campaign ----
+
+# Read data for the different past campaign
+df_shipping <- readRDS('C:/Users/user/OneDrive/Desktop/UNI/TUHH/SEM 3/CAUSAL DATA SC/RDS/shipping.rds')
+
+library(rddensity)
+rddd <- rddensity(df_shipping$purchase_amount, c = 30)
+summary(rddd)
+
+cat("   ## The manipulation tests reveal significant evidence of manipulation around the cut-off point (c=30)")
+
+cat("   ## P-values of the robust T-statistic approach zero, indicating systematic changes in the observed
+      density of the purchase_amount variable near the cut-off.")
+
+cat("   ## The order of estimation and bias differs on each side, suggesting a lack of smoothness or continuity.")
+
+cat("   ## The p-values of binomial tests further indicate non-random behavior around the cut-off.")
+
+cat("   ## The purchase_amount variable, based on the manipulation testing results, may not be suitable as a running 
+      variable for an RDD with a cut-off at 30€")
+
+
+# Plot to confirm that purchase_amount could not be used as a running variable at 30
+ggplot(df_shipping, aes(x = purchase_amount)) +
+  geom_histogram(binwidth = 5, fill = "brown", color = "black") +
+  geom_vline(xintercept = 30, color = "blue", linetype = "dashed") +
+  xlab("Purchase Amount (€)") +
+  ylab("Number of Purchases") +
+  theme_minimal()
+
+
+```

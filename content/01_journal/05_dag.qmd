@@ -1,7 +1,90 @@
 ---
-title: "Directed Acyclic Graphs"
----
+title: "Chap5: DAG"
+author: "Anthony El Khoueiry"
+format: 
+    html:
+      code-line-numbers: true
+      df-print: paged
 
-::: callout-note
-You can delete everything in here and start fresh.
-:::
+---
+----
+
+
+```{r}
+# Libraries
+library(tidyverse)
+library(dagitty)
+library(ggdag)
+
+# Directed Acyclic Graph (DAG) for a Sales Example
+sales_dag <- dagify(
+  sales ~ parking_spots,
+  sales ~ location,
+  parking_spots ~ location, 
+  labels = c(
+    "sales" = "Sales",
+    "parking_spots" = "Parking \n Spots",
+    "location" = "Location"
+  )
+)
+ggdag(sales_dag, use_labels = "label", text = FALSE)
+
+######################################################
+
+# Customer Satisfaction Data
+customer_satisfaction_data <- readRDS('C:/Users/user/OneDrive/Desktop/UNI/TUHH/SEM 3/CAUSAL DATA SC/RDS/customer_sat.rds')
+
+# The Dataset
+head(customer_satisfaction_data)
+
+# Regression Analysis on Satisfaction and Follow-ups
+## Simple Linear Regression ##
+model_simple <- lm(satisfaction ~ follow_ups, data = customer_satisfaction_data)
+summary(model_simple)
+
+# Multiple Linear Regression for Subscription
+model_multiple <- lm(satisfaction ~ follow_ups + subscription, data = customer_satisfaction_data)
+summary(model_multiple)
+
+# Coefficients from the Two Models
+coef_comparison <- data.frame(
+  Model = c("Model 1", "Model 2"),
+  Intercept = c(coef(model_simple)[1], coef(model_multiple)[1]),
+  FollowUps = c(coef(model_simple)[2], coef(model_multiple)[2]),
+  PremiumPlus = c(0, coef(model_multiple)[grep("subscriptionPremium\\+", names(coef(model_multiple)))]),
+  Elite = c(0, coef(model_multiple)[grep("subscriptionElite", names(coef(model_multiple)))])
+)
+print(coef_comparison)
+
+## Model 2 has a lower baseline satisfaction due to a reduced intercept compared to Model 1.
+## Accounting for subscription changes the direction of the relationship between Follow-ups and satisfaction,
+## turning it from negative to positive.
+## There is a positive impact on satisfaction for "PremiumPlus," while there is no additional impact on the "Elite" subscription level.
+
+# Visualization of the Data
+### Simpson's Paradox: Subscription as a Confounding Factor ###
+
+## Without conditioning on subscription
+simps_not_cond <- ggplot(customer_satisfaction_data, aes(x = follow_ups, y = satisfaction)) +
+  geom_point(alpha = 0.8) +
+  stat_smooth(method = "lm", se = F) +
+  labs(title = "Relationship between Follow-ups and Satisfaction",
+       x = "Follow-ups",
+       y = "Satisfaction") +
+  theme_minimal() +
+  theme(legend.position = "right")
+
+## Conditioning on subscription
+simps_cond <- ggplot(customer_satisfaction_data, aes(x = follow_ups, y = satisfaction, color = subscription)) +
+  geom_point(alpha = 0.8) +
+  stat_smooth(method = "lm", se = F, size = 1) +
+  labs(title = "Relationship between Follow-ups and Satisfaction by Subscription Level",
+       x = "Follow-ups",
+       y = "Satisfaction",
+       color = "Subscription") +
+  theme_minimal() +
+  theme(legend.position = "right")
+
+simps_not_cond
+simps_cond
+```

@@ -1,7 +1,72 @@
 ---
-title: "Difference-in-Differences"
----
+title: "Chap8: DID"
+author: "Anthony El Khoueiry"
+format: 
+    html:
+      code-line-numbers: true
+      df-print: paged
 
-::: callout-note
-You can delete everything in here and start fresh.
-:::
+---
+----
+
+
+```{r}
+# Libraries
+library(dplyr)
+library(readr)
+library(lmtest)
+
+# The Dataset
+data <- readRDS('C:/Users/user/OneDrive/Desktop/UNI/TUHH/SEM 3/CAUSAL DATA SC/RDS/hospdd.rds')
+
+# 1. Calculate Mean Satisfaction for Treated and Control Hospitals Before and After the Treatment
+
+## Parameters for Analysis
+threshold_month <- 3.0
+threshold_hospital <- 18
+
+## Data Preparation
+data$month <- as.numeric(data$month)
+data$hospital <- as.numeric(data$hospital)
+
+## Data into Treated and Control Groups
+treated_group <- subset(data,hospital <= 18)
+control_group <- subset(data,hospital > 18)
+
+## Mean Difference Analysis Before Treatment
+before_control_mean <- control_group %>% 
+  filter(month <= threshold_month) %>%
+  summarise(mean_satisfaction = mean(satis)) %>%
+  pull(mean_satisfaction)
+
+before_treatment_mean  <- treated_group %>% 
+  filter(month <= threshold_month) %>%
+  summarise(mean_satisfaction = mean(satis)) %>%
+  pull(mean_satisfaction)
+
+mean_diff_before <- before_treatment_mean - before_control_mean
+
+## Mean Difference Analysis After Treatment
+after_control_mean <- control_group %>% 
+  filter(month > threshold_month) %>%
+  summarise(mean_satisfaction = mean(satis)) %>%
+  pull(mean_satisfaction)
+
+after_treatment_mean <- treated_group %>% 
+  filter(month > threshold_month) %>%
+  summarise(mean_satisfaction = mean(satis)) %>%
+  pull(mean_satisfaction)
+
+mean_diff_after <- after_treatment_mean - after_control_mean
+
+## D-in-D Analysis
+mean_diff_diff <- mean_diff_after - mean_diff_before
+
+# 2. Use Linear Regression to Estimate with Group and Time Fixed Effects
+
+## Linear Regression Model
+model <- lm(satis ~ procedure * as.factor(month) + as.factor(hospital), data)
+
+## The Regression Results
+summary(model)
+```
